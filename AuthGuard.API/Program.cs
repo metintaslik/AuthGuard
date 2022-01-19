@@ -28,7 +28,10 @@ var builder = WebApplication.CreateBuilder(args);
         options.UseSqlite(builder.Configuration.GetConnectionString("SQLiteConnection"));
     });
 
-    builder.Services.AddControllers().AddNewtonsoftJson();
+    builder.Services.AddControllers().AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.DateFormatString = "dd.MM.yyyy HH:mm:ss";
+    });
 
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();

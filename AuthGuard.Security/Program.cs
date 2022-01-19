@@ -14,46 +14,48 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<RoofApiSettings>(builder.Configuration.GetSection("RoofApiSettings"));
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = "GitHub";
-})
-               .AddCookie()
-               .AddOAuth("GitHub", options =>
-               {
-                   options.ClientId = builder.Configuration["GitHubSettings:ClientId"];
-                   options.ClientSecret = builder.Configuration["GitHubSettings:ClientSecret"];
-                   options.CallbackPath = new PathString("/Authentication/Callback");
-                   options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
-                   options.TokenEndpoint = "https://github.com/login/oauth/access_token";
-                   options.UserInformationEndpoint = "https://api.github.com/user";
-                   options.SaveTokens = true;
-                   options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-                   options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
-                   options.ClaimActions.MapJsonKey("urn:github:login", "login");
-                   options.ClaimActions.MapJsonKey("urn:github:url", "html_url");
-                   options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
+builder.Services.AddHttpClient();
 
-                   options.Events = new OAuthEvents
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = "GitHub";
+    })
+           .AddCookie()
+           .AddOAuth("GitHub", options =>
+           {
+               options.ClientId = builder.Configuration["GitHubSettings:ClientId"];
+               options.ClientSecret = builder.Configuration["GitHubSettings:ClientSecret"];
+               options.CallbackPath = new PathString("/Authentication/Callback");
+               options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
+               options.TokenEndpoint = "https://github.com/login/oauth/access_token";
+               options.UserInformationEndpoint = "https://api.github.com/user";
+               options.SaveTokens = true;
+               options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+               options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+               options.ClaimActions.MapJsonKey("urn:github:login", "login");
+               options.ClaimActions.MapJsonKey("urn:github:url", "html_url");
+               options.ClaimActions.MapJsonKey("urn:github:avatar", "avatar_url");
+
+               options.Events = new OAuthEvents
+               {
+                   OnCreatingTicket = async context =>
                    {
-                       OnCreatingTicket = async context =>
-                       {
-                           var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                           request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                           request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-                           var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                           response.EnsureSuccessStatusCode();
-                           var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-                           context.RunClaimActions(json.RootElement);
-                       }
-                   };
-               });
+                       var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                       request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                       request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+                       var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+                       response.EnsureSuccessStatusCode();
+                       var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+                       context.RunClaimActions(json.RootElement);
+                   }
+               };
+           });
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddHttpClient();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 

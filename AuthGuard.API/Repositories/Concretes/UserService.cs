@@ -1,8 +1,10 @@
-﻿using AuthGuard.API.Entities;
+﻿using AuthGuard.API.Data;
+using AuthGuard.API.Entities;
 using AuthGuard.API.Middleware;
 using AuthGuard.API.Models.Requests;
 using AuthGuard.API.Models.Responses;
 using AuthGuard.API.Repositories.Abstracts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -17,12 +19,14 @@ namespace AuthGuard.API.Repositories.Concretes
         private readonly AppSettings _appSettings;
         private readonly RoofAuthGuardSettings roofAuthGuardSettings;
         private readonly IMemoryCache _cache;
+        private readonly ApplicationDBContext dBContext;
 
-        public UserService(IOptions<AppSettings> appSettingsOptions, IOptions<RoofAuthGuardSettings> authGuardOptions, IMemoryCache cache)
+        public UserService(IOptions<AppSettings> appSettingsOptions, IOptions<RoofAuthGuardSettings> authGuardOptions, IMemoryCache cache, ApplicationDBContext dBContext)
         {
             _appSettings = appSettingsOptions.Value;
             roofAuthGuardSettings = authGuardOptions.Value;
             _cache = cache;
+            this.dBContext = dBContext;
         }
 
         public BaseResponse<AuthenticateResponse> Authenticate(AuthenticateRequest model)
@@ -54,9 +58,10 @@ namespace AuthGuard.API.Repositories.Concretes
             throw new NotImplementedException();
         }
 
-        public BaseResponse<IEnumerable<User>> GetUsers(Func<bool, User>? expression = null)
+        public async Task<BaseResponse<IEnumerable<User>>> GetUsersAsync(Func<bool, User>? expression = null)
         {
-            throw new NotImplementedException();
+            var response = new BaseResponse<IEnumerable<User>>(false, httpStatusCode: (int)HttpStatusCode.OK, model: await dBContext.Users.ToListAsync().ConfigureAwait(false));
+            return response;
         }
 
         public BaseResponse<User> UpdateUser(User entity)

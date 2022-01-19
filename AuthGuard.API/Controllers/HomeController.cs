@@ -7,27 +7,28 @@ namespace AuthGuard.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class HomeController : ControllerBase
     {
         private readonly IUserService _userService;
 
-        public AuthController(IUserService userService)
+        public HomeController(IUserService userService)
         {
             _userService = userService;
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult Authenticate(AuthenticateRequest request)
         {
             var response = _userService.Authenticate(request);
             return StatusCode(response.HttpStatusCode!.Value, response);
         }
 
-        [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetUsersAsync()
+        public async Task<IActionResult> GetUsers()
         {
-            return StatusCode(200, "");
+            var response = await _userService.GetUsersAsync().ConfigureAwait(false);
+            return StatusCode(response.HttpStatusCode!.Value, response);
         }
     }
 }
