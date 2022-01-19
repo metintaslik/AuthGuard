@@ -32,5 +32,17 @@ namespace AuthGuard.API.Models.Responses
 
         [Display(Name = "Forbidden")]
         Forbidden = 1,
+
+        [Display(Name = "FailedToUserCreated")]
+        FailedToUserCreated = 2,
+
+        [Display(Name = "UserNotFound")]
+        UserNotFound = 3,
+
+        [Display(Name = "FailedToUserUpdate")]
+        FailedToUserUpdate = 4,
+
+        [Display(Name = "FailedToUserDelete")]
+        FailedToUserDelete = 5
     }
 }

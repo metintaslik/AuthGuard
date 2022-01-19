@@ -22,6 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.Configure<RoofAuthGuardSettings>(builder.Configuration.GetSection("RoofAuthGuardSettings"));
 
     builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddAutoMapper(typeof(Program));
 
     builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {

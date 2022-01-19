@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 #region Services
 
+builder.Services.Configure<GitHubSettings>(builder.Configuration.GetSection("GitHubSettings"));
 builder.Services.Configure<RoofApiSettings>(builder.Configuration.GetSection("RoofApiSettings"));
 
 builder.Services.AddHttpClient();
@@ -22,12 +23,15 @@ builder.Services.AddAuthentication(options =>
         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = "GitHub";
     })
-           .AddCookie()
+           .AddCookie(options =>
+           {
+               options.LoginPath = new PathString("/Home/Authorize");
+           })
            .AddOAuth("GitHub", options =>
            {
                options.ClientId = builder.Configuration["GitHubSettings:ClientId"];
                options.ClientSecret = builder.Configuration["GitHubSettings:ClientSecret"];
-               options.CallbackPath = new PathString("/Authentication/Callback");
+               options.CallbackPath = new PathString("/api/Employee/Callback");
                options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
                options.TokenEndpoint = "https://github.com/login/oauth/access_token";
                options.UserInformationEndpoint = "https://api.github.com/user";

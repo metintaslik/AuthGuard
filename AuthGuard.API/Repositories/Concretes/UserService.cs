@@ -1,9 +1,11 @@
 ﻿using AuthGuard.API.Data;
 using AuthGuard.API.Entities;
 using AuthGuard.API.Middleware;
+using AuthGuard.API.Models.DTOs;
 using AuthGuard.API.Models.Requests;
 using AuthGuard.API.Models.Responses;
 using AuthGuard.API.Repositories.Abstracts;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -20,13 +22,15 @@ namespace AuthGuard.API.Repositories.Concretes
         private readonly RoofAuthGuardSettings roofAuthGuardSettings;
         private readonly IMemoryCache _cache;
         private readonly ApplicationDBContext dBContext;
+        private readonly IMapper _mapper;
 
-        public UserService(IOptions<AppSettings> appSettingsOptions, IOptions<RoofAuthGuardSettings> authGuardOptions, IMemoryCache cache, ApplicationDBContext dBContext)
+        public UserService(IOptions<AppSettings> appSettingsOptions, IOptions<RoofAuthGuardSettings> authGuardOptions, IMemoryCache cache, ApplicationDBContext dBContext, IMapper mapper)
         {
             _appSettings = appSettingsOptions.Value;
             roofAuthGuardSettings = authGuardOptions.Value;
             _cache = cache;
             this.dBContext = dBContext;
+            _mapper = mapper;
         }
 
         public BaseResponse<AuthenticateResponse> Authenticate(AuthenticateRequest model)
@@ -43,30 +47,51 @@ namespace AuthGuard.API.Repositories.Concretes
             return new BaseResponse<AuthenticateResponse>(false, (int)HttpStatusCode.OK, model: new AuthenticateResponse { Token = token, ExpireTime = expire });
         }
 
-        public BaseResponse<User> CreateUser(User entity)
+        public async Task<BaseResponse<UserDto>> CreateUserAsync(User entity)
         {
-            throw new NotImplementedException();
+            await dBContext.Users.AddAsync(entity).ConfigureAwait(false);
+            int affected = await dBContext.SaveChangesAsync().ConfigureAwait(false);
+            if (affected == 0)
+                return new BaseResponse<UserDto>(true, (int)HttpStatusCode.BadRequest, (int)ErrorType.FailedToUserCreated, ErrorType.FailedToUserCreated.ToString());
+
+            return new BaseResponse<UserDto>(false, (int)HttpStatusCode.OK, model: _mapper.Map<UserDto>(entity));
         }
 
-        public BaseResponse<object> DeleteUser(User entity)
+        public async Task<BaseResponse<object>> DeleteUserAsync(User entity)
         {
-            throw new NotImplementedException();
+            var user = await dBContext.Users.FirstOrDefaultAsync(x => x.ID == entity.ID).ConfigureAwait(false);
+            if (user == null)
+                return new BaseResponse<object>(true, (int)HttpStatusCode.BadRequest, (int)ErrorType.UserNotFound, ErrorType.UserNotFound.ToString(), false);
+
+            dBContext.Users.Remove(user);
+            int affected = await dBContext.SaveChangesAsync().ConfigureAwait(false);
+            if (affected == 0)
+                return new BaseResponse<object>(true, (int)HttpStatusCode.BadRequest, (int)ErrorType.FailedToUserDelete, ErrorType.FailedToUserDelete.ToString(), false);
+
+            return new BaseResponse<object>(false, (int)HttpStatusCode.OK, model: true);
         }
 
-        public BaseResponse<User> GetUser(int id)
+        public async Task<BaseResponse<UserDto>> GetUserAsync(int id)
         {
-            throw new NotImplementedException();
+            var user = await dBContext.Users.FirstOrDefaultAsync(x => x.ID == id).ConfigureAwait(false);
+            return new BaseResponse<UserDto>(false, (int)HttpStatusCode.OK, model: _mapper.Map<UserDto>(user));
         }
 
-        public async Task<BaseResponse<IEnumerable<User>>> GetUsersAsync(Func<bool, User>? expression = null)
-        {
-            var response = new BaseResponse<IEnumerable<User>>(false, httpStatusCode: (int)HttpStatusCode.OK, model: await dBContext.Users.ToListAsync().ConfigureAwait(false));
-            return response;
-        }
+        public async Task<BaseResponse<IEnumerable<UserDto>>> GetUsersAsync(Func<bool, User>? expression = null)
+                => new BaseResponse<IEnumerable<UserDto>>(false, httpStatusCode: (int)HttpStatusCode.OK, model: _mapper.Map<List<UserDto>>(await dBContext.Users.ToListAsync().ConfigureAwait(false)));
 
-        public BaseResponse<User> UpdateUser(User entity)
+        public async Task<BaseResponse<UserDto>> UpdateUserAsync(User entity)
         {
-            throw new NotImplementedException();
+            var user = await dBContext.Users.FirstOrDefaultAsync(x => x.ID == entity.ID).ConfigureAwait(false);
+            if (user == null)
+                return new BaseResponse<UserDto>(true, (int)HttpStatusCode.BadRequest, (int)ErrorType.UserNotFound, ErrorType.UserNotFound.ToString());
+
+            dBContext.Entry(user).CurrentValues.SetValues(entity);
+            int affected = await dBContext.SaveChangesAsync();
+            if (affected == 0)
+                return new BaseResponse<UserDto>(true, (int)HttpStatusCode.BadRequest, (int)ErrorType.FailedToUserUpdate, ErrorType.FailedToUserUpdate.ToString());
+
+            return new BaseResponse<UserDto>(false, (int)HttpStatusCode.OK, model: _mapper.Map<UserDto>(entity));
         }
 
         private string GenerateJwtToken(DateTime expire)
