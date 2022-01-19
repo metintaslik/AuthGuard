@@ -1,4 +1,5 @@
-﻿using AuthGuard.API.Middleware;
+﻿using AuthGuard.API.Entities;
+using AuthGuard.API.Middleware;
 using AuthGuard.API.Models.Requests;
 using AuthGuard.API.Models.Responses;
 using AuthGuard.API.Repositories.Abstracts;
@@ -17,10 +18,10 @@ namespace AuthGuard.API.Repositories.Concretes
         private readonly RoofAuthGuardSettings roofAuthGuardSettings;
         private readonly IMemoryCache _cache;
 
-        public UserService(IOptions<RoofAuthGuardSettings> options, AppSettings appSettings, IMemoryCache cache)
+        public UserService(IOptions<AppSettings> appSettingsOptions, IOptions<RoofAuthGuardSettings> authGuardOptions, IMemoryCache cache)
         {
-            _appSettings = appSettings;
-            roofAuthGuardSettings = options.Value;
+            _appSettings = appSettingsOptions.Value;
+            roofAuthGuardSettings = authGuardOptions.Value;
             _cache = cache;
         }
 
@@ -38,10 +39,35 @@ namespace AuthGuard.API.Repositories.Concretes
             return new BaseResponse<AuthenticateResponse>(false, (int)HttpStatusCode.OK, model: new AuthenticateResponse { Token = token, ExpireTime = expire });
         }
 
+        public BaseResponse<User> CreateUser(User entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BaseResponse<object> DeleteUser(User entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BaseResponse<User> GetUser(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BaseResponse<IEnumerable<User>> GetUsers(Func<bool, User>? expression = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BaseResponse<User> UpdateUser(User entity)
+        {
+            throw new NotImplementedException();
+        }
+
         private string GenerateJwtToken(DateTime expire)
         {
             JwtSecurityTokenHandler tokenHandler = new();
-            byte[]? key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            byte[]? key = Encoding.UTF8.GetBytes(_appSettings.Secret);
             SecurityTokenDescriptor tokenDescriptor = new()
             {
                 Expires = expire,

@@ -27,5 +27,8 @@ namespace AuthGuard.API.Entities
         [Required]
         [Range(8, 80)]
         public int Age { get; set; }
+
+        [Required]
+        public bool IsActive { get; set; } = true;
     }
 }

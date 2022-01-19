@@ -37,6 +37,10 @@ namespace AuthGuard.API.Data
                 .IsRequired()
                 .HasColumnType("integer");
 
+                entity.Property(x => x.IsActive)
+                .IsRequired()
+                .HasDefaultValue(true)
+                .HasColumnType("boolean");
             });
         }
 

@@ -1,5 +1,4 @@
 ﻿using AuthGuard.API.Models.Responses;
-using AuthGuard.API.Repositories.Abstracts;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -13,10 +12,10 @@ namespace AuthGuard.API.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly AppSettings _appSettings;
-        private readonly ILogger _logger;
+        private readonly ILogger<JwtMiddleware> _logger;
         private readonly IMemoryCache _cache;
 
-        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> options, ILogger logger, IMemoryCache cache)
+        public JwtMiddleware(RequestDelegate next, IOptions<AppSettings> options, ILogger<JwtMiddleware> logger, IMemoryCache cache)
         {
             _next = next;
             _appSettings = options.Value;

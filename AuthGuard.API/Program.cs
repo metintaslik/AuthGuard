@@ -1,5 +1,7 @@
 using AuthGuard.API.Data;
 using AuthGuard.API.Middleware;
+using AuthGuard.API.Repositories.Abstracts;
+using AuthGuard.API.Repositories.Concretes;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,13 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
         x.AddPolicy(name: "RoofAuthCORSPolicy",
                     builder =>
                     {
-                        builder.WithOrigins("https://localhost:49150")
+                        builder.WithOrigins("https://localhost:44340")
                                .WithMethods("GET", "POST");
                     });
     });
 
     builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
     builder.Services.Configure<RoofAuthGuardSettings>(builder.Configuration.GetSection("RoofAuthGuardSettings"));
+
+    builder.Services.AddScoped<IUserService, UserService>();
 
     builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
