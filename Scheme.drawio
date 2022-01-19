@@ -1,1 +1,16 @@
-<mxfile host="app.diagrams.net" modified="2022-01-19T19:25:37.471Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36" version="16.2.7" etag="lLWoe2iFAnZEQvqmHSaS" type="github"><diagram id="ADFn5euueYk-jLwMCOQI">UzV2zq1wL0osyPDNT0nNUTV2VTV2LsrPL4GwciucU3NyVI0MMlNUjV1UjYwMgFjVyA2HrCFY1qAgsSg1rwSLBiADYTaQg2Y1AA==</diagram></mxfile>
+<mxfile host="app.diagrams.net" modified="2022-01-19T19:32:52.109Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36" etag="dlnKKwBsBlmbpWC80pCg" version="16.2.7" type="github">
+  <diagram id="ADFn5euueYk-jLwMCOQI" name="Page-1">
+    <mxGraphModel dx="1406" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="69LL0J4C1ERPUhWOan6u-2" value="AuthGuard.Security" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="70" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="69LL0J4C1ERPUhWOan6u-3" value="AuthGuard.API" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="70" width="160" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
